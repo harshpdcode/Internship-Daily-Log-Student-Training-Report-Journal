@@ -193,11 +193,15 @@ function showAppInterface() {
   if (loginScreen) loginScreen.classList.add('hidden');
   if (appRoot) appRoot.classList.remove('hidden');
 
-  // Update header student badge
+  // Update header student badge & avatar
   const studentPill = $('header-student-pill');
+  const userAvatar = $('header-user-avatar');
+  const displayName = (state.profile && state.profile.studentName) ? state.profile.studentName : (activeUser || 'Trainee');
   if (studentPill) {
-    const displayName = (state.profile && state.profile.studentName) ? state.profile.studentName : activeUser;
     studentPill.textContent = displayName;
+  }
+  if (userAvatar) {
+    userAvatar.textContent = displayName.charAt(0).toUpperCase();
   }
 
   const companySub = $('header-company-sub');
@@ -1110,9 +1114,13 @@ function renderSummaryMetrics() {
   }
 
   const studentPill = $('header-student-pill');
+  const userAvatar = $('header-user-avatar');
+  const name = (state.profile && state.profile.studentName) ? state.profile.studentName : (activeUser || 'Trainee');
   if (studentPill) {
-    const name = (state.profile && state.profile.studentName) ? state.profile.studentName : activeUser;
     studentPill.textContent = name;
+  }
+  if (userAvatar) {
+    userAvatar.textContent = name.charAt(0).toUpperCase();
   }
 
   const companySub = $('header-company-sub');

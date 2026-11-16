@@ -8,11 +8,11 @@
   <meta name="description"
     content="Offline-first, static daily work journal and report generator for internship college training subjects.">
 
-  <!-- Google Fonts: Newsreader (Book Serif), IBM Plex Sans (Humanist Sans), IBM Plex Mono (Ledger Monospace) -->
+  <!-- Google Fonts: Plus Jakarta Sans (Modern Geometric), IBM Plex Mono (Code/Timestamps), Newsreader (Print Report) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap"
     rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
@@ -27,76 +27,103 @@
        Allowed accounts: Harsh123 (pass: 123) and nishtha123 (pass: 123)
        ====================================================================== -->
   <section class="login-screen-wrapper" id="login-screen" aria-label="Sign In Screen">
-    <div class="login-book-cover">
-      <div class="login-book-spine"></div>
-      <div class="login-book-face">
-
-        <!-- Bookplate Header -->
-        <div class="login-bookplate">
-          <div class="bookplate-seal">
-            <span class="seal-text">IDL &bull; 2026</span>
-          </div>
-          <span class="caps-label">MSc IT Practical Training Subject</span>
-          <h1 class="login-title">Internship Daily Log</h1>
-          <p class="login-subtitle">Laboratory Notebook &amp; Official Training Documentation</p>
+    <div class="login-card-container">
+      
+      <!-- Top Brand Header (Inspired by Modern EdTech / TuteDude) -->
+      <div class="login-brand-header">
+        <div class="brand-logo-badge">
+          <svg class="brand-book-svg" viewBox="0 0 40 40" width="36" height="36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 10C7 7.79086 8.79086 6 11 6H19V32H11C8.79086 32 7 30.2091 7 28V10Z" stroke="url(#logo-grad-1)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M33 10C33 7.79086 31.2091 6 29 6H21V32H29C31.2091 32 33 30.2091 33 28V10Z" stroke="url(#logo-grad-1)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="7" cy="32" r="2" fill="#e11d48"/>
+            <circle cx="33" cy="32" r="2" fill="#7c1a8d"/>
+            <defs>
+              <linearGradient id="logo-grad-1" x1="7" y1="6" x2="33" y2="32" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7c1a8d"/>
+                <stop offset="0.55" stop-color="#a21caf"/>
+                <stop offset="1" stop-color="#e11d48"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span class="brand-logo-name">Daily<span class="gradient-text">Log</span></span>
         </div>
-
-        <!-- Error Alert -->
-        <div class="login-error-banner hidden" id="login-error-banner" role="alert">
-          Invalid username or password. Please verify your credentials.
-        </div>
-
-        <!-- Quick Profile Switcher Cards -->
-        <div class="quick-profiles-shelf">
-          <span class="shelf-label">Select Trainee Profile:</span>
-          <div class="profiles-cards-row">
-            <button type="button" class="profile-card-btn" id="pick-harsh-btn" data-user="Harsh123" data-pass="123">
-              <span class="avatar-badge">H</span>
-              <div class="card-info">
-                <strong class="card-name">Harsh</strong>
-                <span class="card-user">Harsh123</span>
-              </div>
-              <span class="card-select-indicator">&rarr;</span>
-            </button>
-
-            <button type="button" class="profile-card-btn" id="pick-nishtha-btn" data-user="nishtha123" data-pass="123">
-              <span class="avatar-badge">N</span>
-              <div class="card-info">
-                <strong class="card-name">Nishtha</strong>
-                <span class="card-user">nishtha123</span>
-              </div>
-              <span class="card-select-indicator">&rarr;</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Login Form -->
-        <form class="login-form" id="login-form" novalidate>
-          <div class="form-field-group">
-            <label for="login-username" class="field-label">Username</label>
-            <input type="text" id="login-username" name="username" class="field-input field-input-mono"
-              placeholder="Enter username" autocomplete="username" required>
-          </div>
-
-          <div class="form-field-group">
-            <div class="field-label-row">
-              <label for="login-password" class="field-label">Password</label>
-              <button type="button" class="btn-toggle-password" id="toggle-password-btn"
-                aria-label="Toggle password visibility">Show</button>
-            </div>
-            <input type="password" id="login-password" name="password" class="field-input field-input-mono"
-              placeholder="Enter password" autocomplete="current-password" required>
-          </div>
-
-          <button type="submit" class="btn-primary-action login-submit-btn">
-            Open Logbook &rarr;
-          </button>
-        </form>
-
-        <footer class="login-book-footer">
-          <span class="footer-notice">Offline-first &bull; Data stored strictly in this browser</span>
-        </footer>
       </div>
+
+      <!-- Modern Hero Banner Section -->
+      <div class="login-hero-block">
+        <div class="pill-initiative">An MSc IT Practical Training Initiative</div>
+        <h1 class="login-title">
+          Master Full Stack Internship with <span class="gradient-text">Daily Work Log</span>
+        </h1>
+        <p class="login-subtitle">
+          Record everyday tasks, tools, blockers, and generate your university-accredited training report.
+        </p>
+
+        <!-- Upskill -> Intern -> Report Workflow Steps -->
+        <div class="login-steps-bar">
+          <div class="step-chip"><span class="step-icon">&equiv;</span> Log Daily</div>
+          <span class="step-arrow">&rarr;</span>
+          <div class="step-chip"><span class="step-icon">&#9638;</span> Track Hours</div>
+          <span class="step-arrow">&rarr;</span>
+          <div class="step-chip"><span class="step-icon">&sect;</span> Report Ready</div>
+        </div>
+      </div>
+
+      <!-- Error Alert -->
+      <div class="login-error-banner hidden" id="login-error-banner" role="alert">
+        Invalid username or password. Please verify your credentials.
+      </div>
+
+      <!-- Quick Profile Switcher Cards -->
+      <div class="quick-profiles-shelf">
+        <span class="shelf-label">Select Trainee Profile:</span>
+        <div class="profiles-cards-row">
+          <button type="button" class="profile-card-btn" id="pick-harsh-btn" data-user="Harsh123" data-pass="123">
+            <span class="avatar-badge">H</span>
+            <div class="card-info">
+              <strong class="card-name">Harsh</strong>
+              <span class="card-user">Harsh123</span>
+            </div>
+            <span class="card-select-indicator">&rarr;</span>
+          </button>
+
+          <button type="button" class="profile-card-btn" id="pick-nishtha-btn" data-user="nishtha123" data-pass="123">
+            <span class="avatar-badge">N</span>
+            <div class="card-info">
+              <strong class="card-name">Nishtha</strong>
+              <span class="card-user">nishtha123</span>
+            </div>
+            <span class="card-select-indicator">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Login Form -->
+      <form class="login-form" id="login-form" novalidate>
+        <div class="form-field-group">
+          <label for="login-username" class="field-label">Username</label>
+          <input type="text" id="login-username" name="username" class="field-input field-input-modern"
+            placeholder="e.g. Harsh123" autocomplete="username" required>
+        </div>
+
+        <div class="form-field-group">
+          <div class="field-label-row">
+            <label for="login-password" class="field-label">Password</label>
+            <button type="button" class="btn-toggle-password" id="toggle-password-btn"
+              aria-label="Toggle password visibility">Show</button>
+          </div>
+          <input type="password" id="login-password" name="password" class="field-input field-input-modern"
+            placeholder="Enter password (123)" autocomplete="current-password" required>
+        </div>
+
+        <button type="submit" class="btn-primary-action login-submit-btn">
+          Open Daily Logbook &rarr;
+        </button>
+      </form>
+
+      <footer class="login-card-footer">
+        <span class="footer-notice">Offline-first &bull; Data stored strictly in your browser</span>
+      </footer>
     </div>
   </section>
 
@@ -108,16 +135,33 @@
     <!-- Top Navigation & Utility Header -->
     <header class="app-header" id="app-header">
       <div class="header-left">
-        <button type="button" class="btn-text menu-toggle-btn" id="menu-toggle-btn"
-          aria-label="Toggle Table of Contents" aria-expanded="false">
+        <button type="button" class="btn-header menu-toggle-btn" id="menu-toggle-btn"
+          aria-label="Toggle Table of Contents" aria-expanded="false" title="Open Ledger / Calendar">
           <span class="btn-symbol">&equiv;</span>
           <span class="btn-label">Ledger</span>
         </button>
 
         <div class="brand-group">
-          <span class="brand-seal">IDL</span>
+          <div class="brand-logo-icon">
+            <svg viewBox="0 0 32 32" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 8C5 6.34315 6.34315 5 8 5H15V25H8C6.34315 25 5 23.6569 5 22V8Z" stroke="url(#header-logo-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M27 8C27 6.34315 25.6569 5 24 5H17V25H24C25.6569 25 27 23.6569 27 22V8Z" stroke="url(#header-logo-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="5" cy="25" r="1.5" fill="#e11d48"/>
+              <circle cx="27" cy="25" r="1.5" fill="#7c1a8d"/>
+              <defs>
+                <linearGradient id="header-logo-grad" x1="5" y1="5" x2="27" y2="25" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#7c1a8d"/>
+                  <stop offset="0.6" stop-color="#a21caf"/>
+                  <stop offset="1" stop-color="#e11d48"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
           <div class="brand-text-col">
-            <h1 class="brand-title">Internship Daily Log</h1>
+            <h1 class="brand-title">
+              <span class="brand-title-full">Daily<span class="gradient-text">Log</span></span>
+              <span class="brand-title-short">Daily<span class="gradient-text">Log</span></span>
+            </h1>
             <div class="brand-meta-line">
               <span class="active-student-pill" id="header-student-pill">Trainee</span>
               <span class="header-dot">&bull;</span>
@@ -136,14 +180,16 @@
 
       <div class="header-right">
         <!-- Profile Config -->
-        <button type="button" class="btn-header" id="open-profile-btn" aria-label="Open internship profile settings">
-          <span class="btn-symbol">&sect;</span>
+        <button type="button" class="btn-header btn-header-profile" id="open-profile-btn"
+          aria-label="Open internship profile settings" title="Internship Profile Settings">
+          <span class="header-user-avatar" id="header-user-avatar">H</span>
           <span class="btn-label">Profile</span>
         </button>
 
         <!-- Export Dropdown -->
         <div class="dropdown-wrapper">
-          <button type="button" class="btn-header" id="export-menu-btn" aria-haspopup="true" aria-expanded="false">
+          <button type="button" class="btn-header" id="export-menu-btn" aria-haspopup="true" aria-expanded="false"
+            title="Export or Print Report">
             <span class="btn-symbol">&darr;</span>
             <span class="btn-label">Export / Print</span>
           </button>
@@ -171,13 +217,14 @@
 
         <!-- Theme Toggle -->
         <button type="button" class="btn-header theme-toggle-btn" id="theme-toggle-btn"
-          aria-label="Toggle visual theme">
+          aria-label="Toggle visual theme" title="Toggle Theme">
           <span class="btn-symbol" id="theme-symbol">&#9788;</span>
           <span class="btn-label" id="theme-label">Theme</span>
         </button>
 
         <!-- Sign Out -->
-        <button type="button" class="btn-header btn-header-signout" id="logout-btn" title="Sign out of logbook">
+        <button type="button" class="btn-header btn-header-signout" id="logout-btn" title="Sign out of logbook"
+          aria-label="Sign out">
           <span class="btn-symbol">&rarr;</span>
           <span class="btn-label">Sign Out</span>
         </button>
