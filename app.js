@@ -34,7 +34,7 @@ let lastDeletedEntry = null;
 let undoTimeoutId = null;
 
 // Mini Calendar View State
-let calViewDate = new Date(); // Tracks displayed month and year
+let calViewDate = new Date();
 
 /**
  * Creates default state for a specific user profile.
@@ -156,8 +156,17 @@ function showAppInterface() {
   if (loginScreen) loginScreen.classList.add('hidden');
   if (appRoot) appRoot.classList.remove('hidden');
 
-  const userLabel = $('active-user-label');
-  if (userLabel) userLabel.textContent = `Logout (${activeUser})`;
+  // Update header student badge
+  const studentPill = $('header-student-pill');
+  if (studentPill) {
+    const displayName = (state.profile && state.profile.studentName) ? state.profile.studentName : activeUser;
+    studentPill.textContent = displayName;
+  }
+
+  const companySub = $('header-company-sub');
+  if (companySub) {
+    companySub.textContent = (state.profile && state.profile.companyName) ? state.profile.companyName : 'MSc IT Training';
+  }
 
   // Apply theme
   applyTheme(state.meta.theme || 'system');
@@ -179,6 +188,7 @@ function showAppInterface() {
   renderSummaryMetrics();
   renderLedgerList();
   renderMiniCalendar();
+  updateLiveWordCounts();
 }
 
 // ============================================================================
@@ -305,6 +315,30 @@ function updateDraftVisibility(hasDraft) {
   }
 }
 
+function countWords(str) {
+  if (!str) return 0;
+  const matches = str.trim().match(/\S+/g);
+  return matches ? matches.length : 0;
+}
+
+function updateLiveWordCounts() {
+  const workArea = $('entry-work');
+  const workCounter = $('work-done-counter');
+  const totalCounter = $('entry-total-words');
+  const form = $('entry-editor-form');
+
+  if (workArea && workCounter) {
+    const words = countWords(workArea.value);
+    workCounter.textContent = `${words} ${words === 1 ? 'word' : 'words'}`;
+  }
+
+  if (form && totalCounter) {
+    const allText = `${form.title.value} ${form.workDone.value} ${form.toolsUsed.value} ${form.problemsSolved.value} ${form.whatLearned.value}`;
+    const totalWords = countWords(allText);
+    totalCounter.textContent = `${totalWords} words total`;
+  }
+}
+
 // ============================================================================
 // 4. Form & Editor Operations
 // ============================================================================
@@ -325,16 +359,16 @@ function updateEditorMetaDisplays(dateStr) {
     const dayNum = calculateDayNumber(dateStr, startDate);
     if (dayNum !== null) {
       if (dayNum > 0) {
-        if (dayBadge) dayBadge.textContent = `Day ${dayNum}`;
+        if (dayBadge) dayBadge.textContent = String(dayNum).padStart(2, '0');
         const weekNum = calculateWeekNumber(dayNum);
-        if (weekBadge) weekBadge.textContent = `Week ${weekNum}`;
+        if (weekBadge) weekBadge.textContent = String(weekNum).padStart(2, '0');
       } else {
-        if (dayBadge) dayBadge.textContent = `Pre-start (Day ${dayNum})`;
-        if (weekBadge) weekBadge.textContent = 'Week 0';
+        if (dayBadge) dayBadge.textContent = `P${Math.abs(dayNum)}`;
+        if (weekBadge) weekBadge.textContent = '00';
       }
     } else {
-      if (dayBadge) dayBadge.textContent = 'Day —';
-      if (weekBadge) weekBadge.textContent = 'Week —';
+      if (dayBadge) dayBadge.textContent = '—';
+      if (weekBadge) weekBadge.textContent = '—';
     }
   }
 }
@@ -355,6 +389,7 @@ function populateEditor(entry, isDraft = false) {
 
   updateEditorMetaDisplays(form.date.value);
   updateDraftVisibility(isDraft);
+  updateLiveWordCounts();
 
   const statusHelper = $('status-helper');
   if (statusHelper) {
@@ -407,6 +442,7 @@ function captureFormAsDraft() {
     updateDraftVisibility(false);
   }
 
+  updateLiveWordCounts();
   saveState();
 }
 
@@ -432,6 +468,7 @@ function handleDateChange(newDateStr) {
     }
     updateEditorMetaDisplays(newDateStr);
     updateDraftVisibility(false);
+    updateLiveWordCounts();
     updateStatusIndicator(`New entry: ${formatShortDate(newDateStr)}`);
 
     const saveBtn = $('save-entry-btn');
@@ -525,6 +562,7 @@ function promptDeleteCurrentEntry() {
     state.draft = null;
     saveState();
     updateDraftVisibility(false);
+    updateLiveWordCounts();
     updateStatusIndicator('Form cleared');
     return;
   }
@@ -613,6 +651,7 @@ function prepareNewEntry(targetDate = getTodayIsoDate()) {
       form.whatLearned.value = '';
       updateEditorMetaDisplays(targetDate);
       updateDraftVisibility(false);
+      updateLiveWordCounts();
       form.title.focus();
     }
     highlightActiveLedgerRow(targetDate);
@@ -622,12 +661,13 @@ function prepareNewEntry(targetDate = getTodayIsoDate()) {
 }
 
 // ============================================================================
-// 5. Mini Calendar Implementation
+// 5. Monthly Calendar Implementation & Quick Stats
 // ============================================================================
 
 function renderMiniCalendar() {
   const container = $('cal-days-container');
   const monthLabel = $('cal-month-label');
+  const quickStats = $('cal-quick-stats');
   if (!container || !monthLabel) return;
 
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -636,19 +676,27 @@ function renderMiniCalendar() {
 
   monthLabel.textContent = `${months[viewMonth]} ${viewYear}`;
 
-  // First day of current month (0=Sun, 1=Mon, ..., 6=Sat)
   const firstDayIndex = new Date(viewYear, viewMonth, 1).getDay();
-  // Total days in current month
   const totalDays = new Date(viewYear, viewMonth + 1, 0).getDate();
-  // Total days in previous month
   const prevMonthTotalDays = new Date(viewYear, viewMonth, 0).getDate();
 
-  // Map of entries for fast date lookup
   const entryDateMap = new Map();
+  let monthLoggedCount = 0;
+  let monthHoursCount = 0;
+
   if (state && state.entries) {
     for (const e of state.entries) {
       entryDateMap.set(e.date, e);
+      const eDate = parseLocalDate(e.date);
+      if (eDate && eDate.getFullYear() === viewYear && eDate.getMonth() === viewMonth) {
+        if (e.status !== 'No work') monthLoggedCount++;
+        monthHoursCount += (parseFloat(e.hoursWorked) || 0);
+      }
     }
+  }
+
+  if (quickStats) {
+    quickStats.innerHTML = `<span class="cal-stats-text">${months[viewMonth]}: <strong>${monthLoggedCount} days</strong> worked (${monthHoursCount} hrs)</span>`;
   }
 
   const todayStr = getTodayIsoDate();
@@ -656,7 +704,7 @@ function renderMiniCalendar() {
 
   let html = '';
 
-  // 1. Previous month trailing days
+  // 1. Prev month trailing days
   for (let i = firstDayIndex - 1; i >= 0; i--) {
     const dayNum = prevMonthTotalDays - i;
     const prevDate = new Date(viewYear, viewMonth - 1, dayNum);
@@ -671,7 +719,7 @@ function renderMiniCalendar() {
     html += renderCalDayCell(dateStr, day, false, entryDateMap, todayStr, activeEditorDate);
   }
 
-  // 3. Next month leading days (to complete 35 or 42 grid cells)
+  // 3. Next month leading days
   const totalRendered = firstDayIndex + totalDays;
   const remainingCells = (totalRendered % 7 === 0) ? 0 : 7 - (totalRendered % 7);
   for (let day = 1; day <= remainingCells; day++) {
@@ -682,7 +730,6 @@ function renderMiniCalendar() {
 
   container.innerHTML = html;
 
-  // Add click listeners to calendar day buttons
   container.querySelectorAll('.cal-day-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const dateStr = btn.getAttribute('data-date');
@@ -728,8 +775,29 @@ function highlightCalendarDate(dateStr) {
 }
 
 // ============================================================================
-// 6. Table of Contents & Ledger List Rendering
+// 6. Sidebar Tabs & Ledger List
 // ============================================================================
+
+function switchSidebarTab(tabName) {
+  const tabLedgerBtn = $('tab-ledger-btn');
+  const tabCalendarBtn = $('tab-calendar-btn');
+  const panelLedger = $('panel-ledger-view');
+  const panelCalendar = $('panel-calendar-view');
+
+  if (tabName === 'calendar') {
+    if (tabLedgerBtn) tabLedgerBtn.classList.remove('active');
+    if (tabCalendarBtn) tabCalendarBtn.classList.add('active');
+    if (panelLedger) panelLedger.classList.add('hidden');
+    if (panelCalendar) panelCalendar.classList.remove('hidden');
+    renderMiniCalendar();
+  } else {
+    if (tabLedgerBtn) tabLedgerBtn.classList.add('active');
+    if (tabCalendarBtn) tabCalendarBtn.classList.remove('active');
+    if (panelLedger) panelLedger.classList.remove('hidden');
+    if (panelCalendar) panelCalendar.classList.add('hidden');
+    renderLedgerList();
+  }
+}
 
 function populateWeekFilterOptions() {
   const select = $('filter-week');
@@ -828,7 +896,7 @@ function renderLedgerList() {
       <div class="week-group" data-week="${weekNum}">
         <div class="week-group-header">
           <span class="week-group-title">${weekLabel}</span>
-          <span class="week-group-meta">${weekEntries.length} ${weekEntries.length === 1 ? 'entry' : 'entries'} • ${totalHoursInWeek} hrs</span>
+          <span class="week-group-meta">${weekEntries.length} ${weekEntries.length === 1 ? 'entry' : 'entries'} &bull; ${totalHoursInWeek} hrs</span>
         </div>
         <div class="week-rows">
     `;
@@ -853,7 +921,7 @@ function renderLedgerList() {
             <p class="ledger-excerpt">${escapeHtml(excerpt)}</p>
             <div class="ledger-meta">
               <span class="ledger-hours">${entry.hoursWorked || 0} hrs</span>
-              ${entry.toolsUsed ? `<span class="ledger-tools">• ${escapeHtml(entry.toolsUsed)}</span>` : ''}
+              ${entry.toolsUsed ? `<span class="ledger-tools">&bull; ${escapeHtml(entry.toolsUsed)}</span>` : ''}
             </div>
           </div>
         </button>
@@ -919,15 +987,15 @@ function renderSummaryMetrics() {
     missingValElem.classList.toggle('metric-missing-alert', missingDates.length > 0);
   }
 
-  const headerSub = $('header-profile-sub');
-  if (headerSub) {
-    if (state.profile.studentName && state.profile.companyName) {
-      headerSub.textContent = `${state.profile.studentName} • ${state.profile.companyName}`;
-    } else if (state.profile.studentName) {
-      headerSub.textContent = `${state.profile.studentName} — Training Journal`;
-    } else {
-      headerSub.textContent = 'MSc IT Training Journal';
-    }
+  const studentPill = $('header-student-pill');
+  if (studentPill) {
+    const name = (state.profile && state.profile.studentName) ? state.profile.studentName : activeUser;
+    studentPill.textContent = name;
+  }
+
+  const companySub = $('header-company-sub');
+  if (companySub) {
+    companySub.textContent = (state.profile && state.profile.companyName) ? state.profile.companyName : 'MSc IT Training';
   }
 
   const profileBanner = $('profile-reminder-banner');
@@ -1328,12 +1396,18 @@ function applyTheme(theme) {
   document.body.setAttribute('data-theme', theme);
 
   const label = $('theme-label');
+  const symbol = $('theme-symbol');
   if (label) {
     if (theme === 'system') {
       const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      label.textContent = `System (${isDark ? 'Dark' : 'Light'})`;
+      label.textContent = `Auto (${isDark ? 'Dark' : 'Light'})`;
+      if (symbol) symbol.innerHTML = isDark ? '&#9790;' : '&#9788;';
+    } else if (theme === 'dark') {
+      label.textContent = 'Dark';
+      if (symbol) symbol.innerHTML = '&#9790;';
     } else {
-      label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+      label.textContent = 'Light';
+      if (symbol) symbol.innerHTML = '&#9788;';
     }
   }
   saveState();
@@ -1399,6 +1473,7 @@ function handleGlobalKeydown(e) {
     e.preventDefault();
     const search = $('ledger-search');
     if (search) {
+      switchSidebarTab('ledger');
       search.focus();
       search.select();
     }
@@ -1419,27 +1494,41 @@ function handleGlobalKeydown(e) {
 // ============================================================================
 
 function init() {
-  // Listen for system color scheme changes
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (state && state.meta && state.meta.theme === 'system') applyTheme('system');
   });
 
-  // Login Form Handler
+  // Login Form
   const loginForm = $('login-form');
   if (loginForm) loginForm.addEventListener('submit', handleLoginSubmit);
 
-  // Quick account auto-fill buttons
-  document.querySelectorAll('.account-hint-pill').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const u = btn.getAttribute('data-user');
-      const p = btn.getAttribute('data-pass');
-      const usernameInput = $('login-username');
-      const passwordInput = $('login-password');
-      if (usernameInput) usernameInput.value = u;
-      if (passwordInput) passwordInput.value = p;
-      if (passwordInput) passwordInput.focus();
+  // Quick Account Cards
+  const pickHarsh = $('pick-harsh-btn');
+  const pickNishtha = $('pick-nishtha-btn');
+
+  function selectProfile(u, p, btn) {
+    $('login-username').value = u;
+    $('login-password').value = p;
+    document.querySelectorAll('.profile-card-btn').forEach(b => b.classList.remove('selected'));
+    if (btn) btn.classList.add('selected');
+    $('login-password').focus();
+  }
+
+  if (pickHarsh) pickHarsh.addEventListener('click', () => selectProfile('Harsh123', '123', pickHarsh));
+  if (pickNishtha) pickNishtha.addEventListener('click', () => selectProfile('nishtha123', '123', pickNishtha));
+
+  // Toggle Password Visibility
+  const togglePassBtn = $('toggle-password-btn');
+  if (togglePassBtn) {
+    togglePassBtn.addEventListener('click', () => {
+      const passInput = $('login-password');
+      if (passInput) {
+        const isPass = passInput.type === 'password';
+        passInput.type = isPass ? 'text' : 'password';
+        togglePassBtn.textContent = isPass ? 'Hide' : 'Show';
+      }
     });
-  });
+  }
 
   // Logout Handler
   on('logout-btn', 'click', handleLogout);
@@ -1469,6 +1558,34 @@ function init() {
     });
   }
 
+  // Quick Hours Preset Pills
+  document.querySelectorAll('.pill-hour').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const hours = pill.getAttribute('data-hours');
+      const hoursInput = $('entry-hours');
+      if (hoursInput) {
+        hoursInput.value = hours;
+        captureFormAsDraft();
+      }
+    });
+  });
+
+  // Sidebar Tabs (Ledger List vs. Monthly Calendar)
+  on('tab-ledger-btn', 'click', () => switchSidebarTab('ledger'));
+  on('tab-calendar-btn', 'click', () => switchSidebarTab('calendar'));
+
+  // Mobile Bottom Bar Navigation
+  on('mobile-ledger-btn', 'click', () => {
+    switchSidebarTab('ledger');
+    toggleMobileDrawer();
+  });
+  on('mobile-calendar-btn', 'click', () => {
+    switchSidebarTab('calendar');
+    toggleMobileDrawer();
+  });
+  on('mobile-new-entry-btn', 'click', () => prepareNewEntry(getTodayIsoDate()));
+  on('mobile-save-btn', 'click', saveCurrentEntry);
+
   // Mini Calendar Navigation
   on('cal-prev-btn', 'click', () => {
     calViewDate.setMonth(calViewDate.getMonth() - 1);
@@ -1484,7 +1601,7 @@ function init() {
     handleDateChange(getTodayIsoDate());
   });
 
-  // Sidebar Controls
+  // Action Buttons
   on('delete-entry-btn', 'click', promptDeleteCurrentEntry);
   on('new-entry-btn', 'click', () => prepareNewEntry(getTodayIsoDate()));
   on('ledger-search', 'input', renderLedgerList);
@@ -1544,11 +1661,6 @@ function init() {
   on('dismiss-backup-btn', 'click', () => $('backup-reminder-banner').classList.add('hidden'));
   on('setup-profile-btn', 'click', openProfileModal);
   on('dismiss-profile-banner-btn', 'click', () => $('profile-reminder-banner').classList.add('hidden'));
-
-  // Mobile Bottom Bar
-  on('mobile-ledger-btn', 'click', toggleMobileDrawer);
-  on('mobile-new-entry-btn', 'click', () => prepareNewEntry(getTodayIsoDate()));
-  on('mobile-save-btn', 'click', saveCurrentEntry);
 
   // Global Keys
   document.addEventListener('keydown', handleGlobalKeydown);
