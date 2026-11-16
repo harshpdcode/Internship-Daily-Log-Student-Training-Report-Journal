@@ -1,18 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Internship Daily Log — Student Training Report Journal</title>
-  <meta name="description" content="Offline-first, static daily work journal and report generator for internship college training subjects.">
+  <meta name="description"
+    content="Offline-first, static daily work journal and report generator for internship college training subjects.">
 
   <!-- Google Fonts: Newsreader (Book Serif), IBM Plex Sans (Humanist Sans), IBM Plex Mono (Ledger Monospace) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&display=swap"
+    rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:,">
 </head>
+
 <body data-theme="system">
 
   <!-- ======================================================================
@@ -24,7 +30,7 @@
     <div class="login-book-cover">
       <div class="login-book-spine"></div>
       <div class="login-book-face">
-        
+
         <!-- Bookplate Header -->
         <div class="login-bookplate">
           <div class="bookplate-seal">
@@ -68,15 +74,18 @@
         <form class="login-form" id="login-form" novalidate>
           <div class="form-field-group">
             <label for="login-username" class="field-label">Username</label>
-            <input type="text" id="login-username" name="username" class="field-input field-input-mono" placeholder="Enter username" autocomplete="username" required>
+            <input type="text" id="login-username" name="username" class="field-input field-input-mono"
+              placeholder="Enter username" autocomplete="username" required>
           </div>
 
           <div class="form-field-group">
             <div class="field-label-row">
               <label for="login-password" class="field-label">Password</label>
-              <button type="button" class="btn-toggle-password" id="toggle-password-btn" aria-label="Toggle password visibility">Show</button>
+              <button type="button" class="btn-toggle-password" id="toggle-password-btn"
+                aria-label="Toggle password visibility">Show</button>
             </div>
-            <input type="password" id="login-password" name="password" class="field-input field-input-mono" placeholder="Enter password" autocomplete="current-password" required>
+            <input type="password" id="login-password" name="password" class="field-input field-input-mono"
+              placeholder="Enter password" autocomplete="current-password" required>
           </div>
 
           <button type="submit" class="btn-primary-action login-submit-btn">
@@ -95,11 +104,12 @@
        2. MAIN APPLICATION (Hidden until login validation passes)
        ====================================================================== -->
   <div class="app-root hidden" id="app-root">
-    
+
     <!-- Top Navigation & Utility Header -->
     <header class="app-header" id="app-header">
       <div class="header-left">
-        <button type="button" class="btn-text menu-toggle-btn" id="menu-toggle-btn" aria-label="Toggle Table of Contents" aria-expanded="false">
+        <button type="button" class="btn-text menu-toggle-btn" id="menu-toggle-btn"
+          aria-label="Toggle Table of Contents" aria-expanded="false">
           <span class="btn-symbol">&equiv;</span>
           <span class="btn-label">Ledger</span>
         </button>
@@ -160,7 +170,8 @@
         </div>
 
         <!-- Theme Toggle -->
-        <button type="button" class="btn-header theme-toggle-btn" id="theme-toggle-btn" aria-label="Toggle visual theme">
+        <button type="button" class="btn-header theme-toggle-btn" id="theme-toggle-btn"
+          aria-label="Toggle visual theme">
           <span class="btn-symbol" id="theme-symbol">&#9788;</span>
           <span class="btn-label" id="theme-label">Theme</span>
         </button>
@@ -179,11 +190,13 @@
       <div class="banner banner-warning hidden" id="backup-reminder-banner" role="alert">
         <div class="banner-content">
           <span class="banner-tag">Notice</span>
-          <p class="banner-message">You have not exported a backup in over 7 days. Your records reside strictly in this browser's local memory.</p>
+          <p class="banner-message">You have not exported a backup in over 7 days. Your records reside strictly in this
+            browser's local memory.</p>
         </div>
         <div class="banner-actions">
           <button type="button" class="btn-banner-action" id="backup-now-btn">Download Backup (.json)</button>
-          <button type="button" class="btn-banner-dismiss" id="dismiss-backup-btn" aria-label="Dismiss banner">Dismiss</button>
+          <button type="button" class="btn-banner-dismiss" id="dismiss-backup-btn"
+            aria-label="Dismiss banner">Dismiss</button>
         </div>
       </div>
 
@@ -191,30 +204,36 @@
       <div class="banner banner-info hidden" id="profile-reminder-banner" role="alert">
         <div class="banner-content">
           <span class="banner-tag">Setup</span>
-          <p class="banner-message">Set your internship start date and details in your profile to compute Day 1, Week numbers, and detect missed log days.</p>
+          <p class="banner-message">Set your internship start date and details in your profile to compute Day 1, Week
+            numbers, and detect missed log days.</p>
         </div>
         <div class="banner-actions">
           <button type="button" class="btn-banner-action" id="setup-profile-btn">Set Up Profile</button>
-          <button type="button" class="btn-banner-dismiss" id="dismiss-profile-banner-btn" aria-label="Dismiss banner">Dismiss</button>
+          <button type="button" class="btn-banner-dismiss" id="dismiss-profile-banner-btn"
+            aria-label="Dismiss banner">Dismiss</button>
         </div>
       </div>
     </div>
 
     <!-- Main Application Layout: Two-column desktop ledger -->
     <main class="app-container" id="app-container">
-      
+
       <!-- Left Column: Table of Contents & Ledger Sidebar -->
       <aside class="ledger-sidebar" id="ledger-sidebar" aria-label="Table of Contents and Log Entries">
-        
+
         <!-- Sidebar Sticky Header -->
         <div class="sidebar-top-bar">
           <div class="sidebar-heading-group">
             <span class="caps-label">Table of Contents</span>
             <h2 class="sidebar-title">Daily Ledger</h2>
           </div>
-          <button type="button" class="btn-primary-action btn-add-entry" id="new-entry-btn">
-            <span class="btn-symbol">+</span> New Entry
-          </button>
+          <div class="sidebar-top-actions">
+            <button type="button" class="btn-primary-action btn-add-entry" id="new-entry-btn">
+              <span class="btn-symbol">+</span> New Entry
+            </button>
+            <button type="button" class="sidebar-close-btn" id="sidebar-close-btn"
+              aria-label="Close sidebar">&times;</button>
+          </div>
         </div>
 
         <!-- Quick Logbook Summary Metrics Shelf -->
@@ -231,7 +250,8 @@
             <span class="metric-value" id="metric-streak">0</span>
             <span class="metric-label">Streak</span>
           </div>
-          <button type="button" class="summary-metric summary-metric-clickable" id="metric-missing-btn" title="Click to view unlogged calendar days">
+          <button type="button" class="summary-metric summary-metric-clickable" id="metric-missing-btn"
+            title="Click to view unlogged calendar days">
             <span class="metric-value" id="metric-missing">0</span>
             <span class="metric-label">Missing</span>
           </button>
@@ -249,12 +269,13 @@
 
         <!-- 1. TAB PANEL: LEDGER LIST (Default) -->
         <div class="sidebar-tab-panel" id="panel-ledger-view">
-          
+
           <!-- Search and Filter Controls -->
           <div class="ledger-controls">
             <div class="search-box-wrapper">
               <label for="ledger-search" class="visually-hidden">Search log entries</label>
-              <input type="search" id="ledger-search" class="search-input" placeholder="Search tasks, tools, notes... (Ctrl+K)" autocomplete="off">
+              <input type="search" id="ledger-search" class="search-input"
+                placeholder="Search tasks, tools, notes... (Ctrl+K)" autocomplete="off">
               <kbd class="search-kbd-hint">Ctrl+K</kbd>
             </div>
 
@@ -280,7 +301,8 @@
           </div>
 
           <!-- Scrollable Stream of Ledger Lines -->
-          <div class="ledger-entries-stream" id="ledger-entries-stream" role="region" aria-label="Entries list" tabindex="0">
+          <div class="ledger-entries-stream" id="ledger-entries-stream" role="region" aria-label="Entries list"
+            tabindex="0">
             <div class="ledger-empty-state">
               <p class="empty-title">No entries found</p>
               <p class="empty-sub">Add your first daily log or adjust your search filters.</p>
@@ -337,9 +359,9 @@
 
       <!-- Right Column: Wide Main Reading & Editing Workspace (The Notebook Page) -->
       <section class="main-workspace" id="main-workspace" aria-label="Entry Editor and Viewer">
-        
+
         <form class="entry-editor-form" id="entry-editor-form" novalidate>
-          
+
           <!-- Classic Notebook Left Margin Seam & Stitching Rule -->
           <div class="notebook-page-margin"></div>
 
@@ -355,7 +377,8 @@
                   <span class="stamp-prefix">WEEK</span>
                   <span class="stamp-number" id="editor-week-badge">01</span>
                 </div>
-                <span class="draft-indicator" id="draft-indicator" title="Unsaved modifications stored in draft">Draft Active</span>
+                <span class="draft-indicator" id="draft-indicator" title="Unsaved modifications stored in draft">Draft
+                  Active</span>
               </div>
 
               <div class="editor-actions-group">
@@ -382,10 +405,11 @@
                   <div class="quick-hours-pills">
                     <button type="button" class="pill-hour" data-hours="4.0">4h</button>
                     <button type="button" class="pill-hour" data-hours="6.0">6h</button>
-                    <button type="button" class="pill-hour" data-hours="8.0">8h</button>
+                    <button type="button" class="pill-hour" data-hours="9.0">9h</button>
                   </div>
                 </div>
-                <input type="number" id="entry-hours" name="hoursWorked" class="field-input field-input-mono" min="0" max="24" step="0.5" placeholder="8.0" required>
+                <input type="number" id="entry-hours" name="hoursWorked" class="field-input field-input-mono" min="0"
+                  max="24" step="0.5" placeholder="8.0" required>
                 <span class="field-helper">Decimal allowed (e.g. 7.5)</span>
               </div>
 
@@ -403,11 +427,12 @@
 
             <!-- Main Lined Paper Body -->
             <div class="editor-paper-body">
-              
+
               <!-- Daily Focus & Title -->
               <div class="form-field-group">
                 <label for="entry-title" class="field-label">Daily Focus &amp; Title</label>
-                <input type="text" id="entry-title" name="title" class="field-input field-input-title" placeholder="e.g. Developed JWT token authentication middleware and user endpoints" required>
+                <input type="text" id="entry-title" name="title" class="field-input field-input-title"
+                  placeholder="e.g. Developed JWT token authentication middleware and user endpoints" required>
               </div>
 
               <!-- Work Done (Long Text) -->
@@ -416,33 +441,38 @@
                   <label for="entry-work" class="field-label">Work Done &amp; Tasks Completed</label>
                   <span class="field-counter" id="work-done-counter">0 words</span>
                 </div>
-                <textarea id="entry-work" name="workDone" class="field-textarea field-textarea-large" rows="7" placeholder="Document specific tasks accomplished today: design architecture discussions, modules implemented, Git branches merged, unit tests executed, code reviews attended..."></textarea>
+                <textarea id="entry-work" name="workDone" class="field-textarea field-textarea-large" rows="7"
+                  placeholder="Document specific tasks accomplished today: design architecture discussions, modules implemented, Git branches merged, unit tests executed, code reviews attended..."></textarea>
               </div>
 
               <!-- Tools and Technologies Used -->
               <div class="form-field-group">
                 <label for="entry-tools" class="field-label">Tools &amp; Technologies Used</label>
-                <input type="text" id="entry-tools" name="toolsUsed" class="field-input" placeholder="e.g. Node.js, Express, PostgreSQL, Postman, Git, Docker, Figma">
+                <input type="text" id="entry-tools" name="toolsUsed" class="field-input"
+                  placeholder="e.g. Node.js, Express, PostgreSQL, Postman, Git, Docker, Figma">
                 <span class="field-helper">Comma-separated software libraries, frameworks, services, or equipment</span>
               </div>
 
               <!-- Problems Faced & How They Were Solved -->
               <div class="form-field-group">
                 <label for="entry-problems" class="field-label">Problems Encountered &amp; Solutions Applied</label>
-                <textarea id="entry-problems" name="problemsSolved" class="field-textarea" rows="4" placeholder="What issues, edge cases, bugs, or blockers occurred today, and what specific debugging steps, documentation, or mentors resolved them?"></textarea>
+                <textarea id="entry-problems" name="problemsSolved" class="field-textarea" rows="4"
+                  placeholder="What issues, edge cases, bugs, or blockers occurred today, and what specific debugging steps, documentation, or mentors resolved them?"></textarea>
               </div>
 
               <!-- What I Learned -->
               <div class="form-field-group">
                 <label for="entry-learned" class="field-label">Key Learnings &amp; Technical Insights</label>
-                <textarea id="entry-learned" name="whatLearned" class="field-textarea" rows="4" placeholder="Concepts understood, design patterns discovered, industry best practices absorbed, or insights regarding the engineering domain..."></textarea>
+                <textarea id="entry-learned" name="whatLearned" class="field-textarea" rows="4"
+                  placeholder="Concepts understood, design patterns discovered, industry best practices absorbed, or insights regarding the engineering domain..."></textarea>
               </div>
             </div>
 
             <!-- Bottom Action & Word Count Bar -->
             <div class="editor-bottom-bar">
               <div class="editor-bottom-left">
-                <span class="quiet-draft-note" id="bottom-draft-note">All edits automatically saved to local draft.</span>
+                <span class="quiet-draft-note" id="bottom-draft-note">All edits automatically saved to local
+                  draft.</span>
                 <span class="entry-total-words" id="entry-total-words">0 words total</span>
               </div>
               <div class="editor-bottom-right">
@@ -475,41 +505,49 @@
     </nav>
 
     <!-- Profile Configuration Modal -->
-    <div class="modal-backdrop hidden" id="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
+    <div class="modal-backdrop hidden" id="profile-modal" role="dialog" aria-modal="true"
+      aria-labelledby="profile-modal-title">
       <div class="modal-dialog">
         <div class="modal-header">
           <h3 class="modal-title" id="profile-modal-title">Internship Profile</h3>
-          <button type="button" class="modal-close-btn" id="close-profile-modal-btn" aria-label="Close dialog">&times;</button>
+          <button type="button" class="modal-close-btn" id="close-profile-modal-btn"
+            aria-label="Close dialog">&times;</button>
         </div>
         <p class="modal-description">
-          These details form the official header of your daily training report and establish the timeline used to calculate Day 1 and Week numbers.
+          These details form the official header of your daily training report and establish the timeline used to
+          calculate Day 1 and Week numbers.
         </p>
 
         <form class="modal-form" id="profile-form">
           <div class="modal-form-grid">
             <div class="form-field-group">
               <label for="profile-student-name" class="field-label">Student Full Name</label>
-              <input type="text" id="profile-student-name" name="studentName" class="field-input" placeholder="e.g. Jane Doe" required>
+              <input type="text" id="profile-student-name" name="studentName" class="field-input"
+                placeholder="e.g. Jane Doe" required>
             </div>
 
             <div class="form-field-group">
               <label for="profile-college" class="field-label">College / University</label>
-              <input type="text" id="profile-college" name="college" class="field-input" placeholder="e.g. Department of Computer Science & IT" required>
+              <input type="text" id="profile-college" name="college" class="field-input"
+                placeholder="e.g. Department of Computer Science & IT" required>
             </div>
 
             <div class="form-field-group">
               <label for="profile-company" class="field-label">Company / Host Organization</label>
-              <input type="text" id="profile-company" name="companyName" class="field-input" placeholder="e.g. Acme Software Technologies Ltd." required>
+              <input type="text" id="profile-company" name="companyName" class="field-input"
+                placeholder="e.g. Acme Software Technologies Ltd." required>
             </div>
 
             <div class="form-field-group">
               <label for="profile-department" class="field-label">Internship Department / Team</label>
-              <input type="text" id="profile-department" name="department" class="field-input" placeholder="e.g. Cloud Infrastructure & Platform Team" required>
+              <input type="text" id="profile-department" name="department" class="field-input"
+                placeholder="e.g. Cloud Infrastructure & Platform Team" required>
             </div>
 
             <div class="form-field-group">
               <label for="profile-supervisor" class="field-label">Industry Supervisor / Mentor</label>
-              <input type="text" id="profile-supervisor" name="supervisorName" class="field-input" placeholder="e.g. Dr. Robert Taylor, Senior Architect" required>
+              <input type="text" id="profile-supervisor" name="supervisorName" class="field-input"
+                placeholder="e.g. Dr. Robert Taylor, Senior Architect" required>
             </div>
 
             <div class="form-field-group">
@@ -534,14 +572,17 @@
     </div>
 
     <!-- Missing Days Breakdown Modal -->
-    <div class="modal-backdrop hidden" id="missing-days-modal" role="dialog" aria-modal="true" aria-labelledby="missing-modal-title">
+    <div class="modal-backdrop hidden" id="missing-days-modal" role="dialog" aria-modal="true"
+      aria-labelledby="missing-modal-title">
       <div class="modal-dialog">
         <div class="modal-header">
           <h3 class="modal-title" id="missing-modal-title">Missing Calendar Log Days</h3>
-          <button type="button" class="modal-close-btn" id="close-missing-modal-btn" aria-label="Close dialog">&times;</button>
+          <button type="button" class="modal-close-btn" id="close-missing-modal-btn"
+            aria-label="Close dialog">&times;</button>
         </div>
         <p class="modal-description">
-          Calendar dates between your internship start date and today that do not have an entry logged. Click any date to immediately open and fill its log.
+          Calendar dates between your internship start date and today that do not have an entry logged. Click any date
+          to immediately open and fill its log.
         </p>
 
         <div class="missing-days-list" id="missing-days-list"></div>
@@ -553,11 +594,13 @@
     </div>
 
     <!-- Import Backup Confirmation Modal -->
-    <div class="modal-backdrop hidden" id="import-modal" role="dialog" aria-modal="true" aria-labelledby="import-modal-title">
+    <div class="modal-backdrop hidden" id="import-modal" role="dialog" aria-modal="true"
+      aria-labelledby="import-modal-title">
       <div class="modal-dialog">
         <div class="modal-header">
           <h3 class="modal-title" id="import-modal-title">Confirm Backup Import</h3>
-          <button type="button" class="modal-close-btn" id="close-import-modal-btn" aria-label="Close dialog">&times;</button>
+          <button type="button" class="modal-close-btn" id="close-import-modal-btn"
+            aria-label="Close dialog">&times;</button>
         </div>
         <div class="modal-body" id="import-modal-summary"></div>
         <p class="modal-description">
@@ -566,7 +609,8 @@
         <div class="modal-footer-stacked">
           <button type="button" class="btn-primary-action" id="confirm-import-merge-btn">
             Merge with Existing Logs
-            <small class="btn-subtext">Overwrites matching dates and appends new entries without losing unmentioned logs</small>
+            <small class="btn-subtext">Overwrites matching dates and appends new entries without losing unmentioned
+              logs</small>
           </button>
           <button type="button" class="btn-danger-action" id="confirm-import-replace-btn">
             Replace Entire Logbook
@@ -578,11 +622,13 @@
     </div>
 
     <!-- Delete Entry Confirmation Dialog -->
-    <div class="modal-backdrop hidden" id="delete-modal" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+    <div class="modal-backdrop hidden" id="delete-modal" role="dialog" aria-modal="true"
+      aria-labelledby="delete-modal-title">
       <div class="modal-dialog modal-dialog-small">
         <div class="modal-header">
           <h3 class="modal-title" id="delete-modal-title">Delete Daily Entry</h3>
-          <button type="button" class="modal-close-btn" id="close-delete-modal-btn" aria-label="Close dialog">&times;</button>
+          <button type="button" class="modal-close-btn" id="close-delete-modal-btn"
+            aria-label="Close dialog">&times;</button>
         </div>
         <p class="modal-description" id="delete-modal-message">
           Are you sure you want to delete this entry? You can restore it immediately using the undo option.
@@ -600,7 +646,8 @@
         <span class="toast-message" id="toast-message">Entry deleted.</span>
         <div class="toast-actions">
           <button type="button" class="btn-toast-undo" id="toast-undo-btn">Undo</button>
-          <button type="button" class="btn-toast-dismiss" id="toast-dismiss-btn" aria-label="Dismiss notification">&times;</button>
+          <button type="button" class="btn-toast-dismiss" id="toast-dismiss-btn"
+            aria-label="Dismiss notification">&times;</button>
         </div>
       </div>
     </div>
@@ -612,4 +659,5 @@
 
   <script type="module" src="app.js"></script>
 </body>
+
 </html>

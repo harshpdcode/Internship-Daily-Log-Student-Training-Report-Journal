@@ -99,6 +99,12 @@ function saveState() {
     localStorage.setItem(key, JSON.stringify(state));
     return true;
   } catch (error) {
+    // Handle storage quota exceeded or private-mode restrictions
+    if (error && (error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED')) {
+      showToast('Storage is full. Please export a backup and clear some data to continue.', 'error', 8000);
+    } else {
+      showToast('Could not save to browser storage. Changes may be lost if you close the tab.', 'warning', 7000);
+    }
     console.error('Error writing state to localStorage:', error);
     updateStatusIndicator('Storage error', true);
     return false;
@@ -111,9 +117,29 @@ function handleLoginSubmit(e) {
   const username = form.username.value.trim();
   const password = form.password.value;
   const errorBanner = $('login-error-banner');
+  const submitBtn = form.querySelector('button[type="submit"]');
+
+  // Friendly empty-field hints
+  if (!username) {
+    if (errorBanner) {
+      errorBanner.textContent = 'Please enter your username.';
+      errorBanner.classList.remove('hidden');
+    }
+    form.username.focus();
+    return;
+  }
+  if (!password) {
+    if (errorBanner) {
+      errorBanner.textContent = 'Please enter your password.';
+      errorBanner.classList.remove('hidden');
+    }
+    form.password.focus();
+    return;
+  }
 
   if (AUTHORIZED_ACCOUNTS[username] && AUTHORIZED_ACCOUNTS[username] === password) {
     if (errorBanner) errorBanner.classList.add('hidden');
+    if (submitBtn) submitBtn.textContent = 'Opening\u2026';
     activeUser = username;
     try {
       localStorage.setItem(SESSION_USER_KEY, username);
@@ -121,12 +147,23 @@ function handleLoginSubmit(e) {
 
     state = loadUserState(username);
     form.reset();
+    document.querySelectorAll('.profile-card-btn').forEach(b => b.classList.remove('selected'));
     showAppInterface();
   } else {
     if (errorBanner) {
-      errorBanner.textContent = 'Invalid username or password. Please verify credentials.';
+      if (AUTHORIZED_ACCOUNTS[username]) {
+        errorBanner.textContent = 'Incorrect password. The password is 123.';
+      } else {
+        errorBanner.textContent = 'Username not recognised. Use Harsh123 or nishtha123.';
+      }
       errorBanner.classList.remove('hidden');
     }
+    if (submitBtn) submitBtn.textContent = 'Open Logbook \u2192';
+    // Shake the password field for a wrong password attempt
+    const passwordInput = form.password;
+    passwordInput.select();
+    passwordInput.classList.add('field-error-pulse');
+    setTimeout(() => passwordInput.classList.remove('field-error-pulse'), 400);
   }
 }
 
@@ -486,8 +523,7 @@ function saveCurrentEntry() {
 
   const dateValue = form.date.value;
   if (!dateValue) {
-    alert('Please specify a valid date for this log entry.');
-    form.date.focus();
+    fieldError(form.date, 'Please choose a date for this log entry before saving.');
     return;
   }
 
@@ -496,16 +532,14 @@ function saveCurrentEntry() {
     if (isNaN(hoursValue) || form.hoursWorked.value === '') hoursValue = 0;
   } else {
     if (isNaN(hoursValue) || hoursValue < 0 || hoursValue > 24) {
-      alert('Please enter valid hours worked (between 0 and 24).');
-      form.hoursWorked.focus();
+      fieldError(form.hoursWorked, 'Hours worked must be a number between 0 and 24 (decimals like 7.5 are fine).');
       return;
     }
   }
 
   const titleValue = form.title.value.trim();
   if (!titleValue) {
-    alert('Please provide a brief focus/title for the day.');
-    form.title.focus();
+    fieldError(form.title, 'Please add a short title or focus summary for this day before saving.');
     return;
   }
 
@@ -539,6 +573,9 @@ function saveCurrentEntry() {
   updateStatusIndicator(`Saved at ${timeStr}`);
   updateDraftVisibility(false);
 
+  // Show a brief success toast on each save
+  showToast(`Entry saved \u2014 ${formatShortDate(dateValue)} at ${timeStr}`, 'success', 3000);
+
   renderLedgerList();
   renderSummaryMetrics();
   renderMiniCalendar();
@@ -552,6 +589,7 @@ function promptDeleteCurrentEntry() {
 
   const entry = state.entries.find(e => e.date === dateValue);
   if (!entry) {
+    // No saved entry exists for this date — just clear the draft editor
     if (form) {
       form.title.value = '';
       form.workDone.value = '';
@@ -564,6 +602,7 @@ function promptDeleteCurrentEntry() {
     updateDraftVisibility(false);
     updateLiveWordCounts();
     updateStatusIndicator('Form cleared');
+    showToast('Draft cleared. No saved entry existed for this date.', 'info', 3000);
     return;
   }
 
@@ -612,16 +651,87 @@ function restoreDeletedEntry() {
   updateStatusIndicator(`Restored entry for ${formatShortDate(entry.date)}`);
 }
 
+// ============================================================================
+// 4b. Friendly Toast Notification System (replaces all browser alert() calls)
+// ============================================================================
+let _toastQueue = [];
+let _toastTimer = null;
+
+/**
+ * Show a non-blocking friendly toast notification.
+ * @param {string} message  - Text to display
+ * @param {'info'|'success'|'warning'|'error'|'undo'} type - Visual style
+ * @param {number} duration - Auto-dismiss ms (0 = manual only)
+ * @param {string|null} undoLabel - If provided, renders an Undo button
+ * @param {Function|null} onUndo - Callback for undo action
+ */
+function showToast(message, type = 'info', duration = 4500, undoLabel = null, onUndo = null) {
+  const shelf = $('toast-shelf');
+  if (!shelf) return;
+
+  // Reuse the existing undo-toast element for undo type, create a new one otherwise
+  let toast;
+  if (type === 'undo') {
+    toast = $('undo-toast');
+    if (!toast) return;
+    const msgElem = $('toast-message');
+    if (msgElem) msgElem.textContent = message;
+    toast.className = 'toast-item toast-undo';
+    toast.classList.remove('hidden');
+
+    if (undoTimeoutId) clearTimeout(undoTimeoutId);
+    if (duration > 0) {
+      undoTimeoutId = setTimeout(hideUndoToast, duration);
+    }
+    return;
+  }
+
+  // Create a dynamic toast
+  toast = document.createElement('div');
+  toast.className = `toast-item toast-${type}`;
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
+
+  const msgSpan = document.createElement('span');
+  msgSpan.className = 'toast-message';
+  msgSpan.textContent = message;
+  toast.appendChild(msgSpan);
+
+  const actionsDiv = document.createElement('div');
+  actionsDiv.className = 'toast-actions';
+
+  if (undoLabel && typeof onUndo === 'function') {
+    const undoBtn = document.createElement('button');
+    undoBtn.type = 'button';
+    undoBtn.className = 'btn-toast-undo';
+    undoBtn.textContent = undoLabel;
+    undoBtn.addEventListener('click', () => {
+      onUndo();
+      toast.remove();
+    });
+    actionsDiv.appendChild(undoBtn);
+  }
+
+  const dismissBtn = document.createElement('button');
+  dismissBtn.type = 'button';
+  dismissBtn.className = 'btn-toast-dismiss';
+  dismissBtn.setAttribute('aria-label', 'Dismiss notification');
+  dismissBtn.textContent = '\u00d7';
+  dismissBtn.addEventListener('click', () => toast.remove());
+  actionsDiv.appendChild(dismissBtn);
+
+  toast.appendChild(actionsDiv);
+  shelf.appendChild(toast);
+
+  if (duration > 0) {
+    setTimeout(() => {
+      if (toast.parentNode) toast.remove();
+    }, duration);
+  }
+}
+
 function showUndoToast(message) {
-  const toast = $('undo-toast');
-  const msgElem = $('toast-message');
-  if (!toast || !msgElem) return;
-
-  msgElem.textContent = message;
-  toast.classList.remove('hidden');
-
-  if (undoTimeoutId) clearTimeout(undoTimeoutId);
-  undoTimeoutId = setTimeout(hideUndoToast, 10000);
+  showToast(message, 'undo', 10000);
 }
 
 function hideUndoToast() {
@@ -630,6 +740,18 @@ function hideUndoToast() {
   if (undoTimeoutId) {
     clearTimeout(undoTimeoutId);
     undoTimeoutId = null;
+  }
+}
+
+/**
+ * Shake a form field and show a toast instead of a browser alert.
+ */
+function fieldError(fieldEl, message) {
+  showToast(message, 'warning', 5000);
+  if (fieldEl) {
+    fieldEl.focus();
+    fieldEl.classList.add('field-error-pulse');
+    setTimeout(() => fieldEl.classList.remove('field-error-pulse'), 400);
   }
 }
 
@@ -1135,6 +1257,7 @@ function exportBackupJson() {
   downloadBlob(blob, `internship-log-backup-${activeUser}-${getTodayIsoDate()}.json`);
   checkBackupReminder();
   updateStatusIndicator('Backup exported');
+  showToast('Backup downloaded \u2014 keep this file safe. Import it here if you ever switch browsers or devices.', 'success', 5500);
 }
 
 let pendingImportData = null;
@@ -1167,7 +1290,7 @@ function handleImportFileSelect(e) {
       }
       if (modal) modal.classList.remove('hidden');
     } catch (err) {
-      alert('Failed to parse backup file: ' + err.message);
+      showToast('Could not read that backup file. Make sure it is a valid .json backup exported from this app. (' + err.message + ')', 'error', 8000);
     }
   };
   reader.readAsText(file);
@@ -1206,10 +1329,12 @@ function executeImportMerge() {
   renderMiniCalendar();
   prepareNewEntry(getTodayIsoDate());
   updateStatusIndicator('Logs merged successfully');
+  showToast(`Backup merged \u2014 ${importedEntries.length} entries imported.`, 'success', 4000);
 }
 
 function executeImportReplace() {
   if (!pendingImportData) return;
+  const entriesCount = Array.isArray(pendingImportData.entries) ? pendingImportData.entries.length : 0;
   state.entries = Array.isArray(pendingImportData.entries) ? pendingImportData.entries : [];
   state.entries.sort((a, b) => a.date.localeCompare(b.date));
 
@@ -1226,6 +1351,7 @@ function executeImportReplace() {
   renderMiniCalendar();
   prepareNewEntry(getTodayIsoDate());
   updateStatusIndicator('Logbook replaced completely');
+  showToast(`Logbook replaced \u2014 ${entriesCount} entries loaded from backup.`, 'success', 4500);
 }
 
 // ============================================================================
@@ -1291,10 +1417,15 @@ function buildTextReport() {
 }
 
 function exportTextReport() {
+  if (!state.entries || state.entries.length === 0) {
+    showToast('No entries to export yet. Add at least one daily log first.', 'warning', 4500);
+    return;
+  }
   const text = buildTextReport();
   const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
   downloadBlob(blob, `internship-daily-report-${activeUser}-${getTodayIsoDate()}.txt`);
   updateStatusIndicator('Report exported (.txt)');
+  showToast('Report downloaded as .txt \u2014 open it in any text editor or submit as-is.', 'success', 5000);
 }
 
 // ============================================================================
@@ -1609,6 +1740,8 @@ function init() {
   on('filter-status', 'change', renderLedgerList);
   on('menu-toggle-btn', 'click', toggleMobileDrawer);
   on('drawer-overlay', 'click', closeMobileDrawer);
+  // Sidebar close button (mobile — appears inside sidebar header)
+  on('sidebar-close-btn', 'click', closeMobileDrawer);
   on('theme-toggle-btn', 'click', cycleTheme);
   on('open-profile-btn', 'click', openProfileModal);
 
@@ -1623,10 +1756,14 @@ function init() {
     document.addEventListener('click', () => dropdownWrapper.classList.remove('open'));
   }
 
-  on('export-txt-btn', 'click', exportTextReport);
-  on('print-pdf-btn', 'click', handlePrintReport);
-  on('export-json-btn', 'click', exportBackupJson);
-  on('import-json-input', 'change', handleImportFileSelect);
+  function closeDropdown() {
+    if (dropdownWrapper) dropdownWrapper.classList.remove('open');
+  }
+
+  on('export-txt-btn', 'click', () => { closeDropdown(); exportTextReport(); });
+  on('print-pdf-btn', 'click', () => { closeDropdown(); handlePrintReport(); });
+  on('export-json-btn', 'click', () => { closeDropdown(); exportBackupJson(); });
+  on('import-json-input', 'change', (e) => { closeDropdown(); handleImportFileSelect(e); });
 
   // Profile Form
   const profileForm = $('profile-form');

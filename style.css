@@ -671,11 +671,46 @@ a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px
   justify-content: space-between;
 }
 
+.sidebar-heading-group {
+  display: flex;
+  flex-direction: column;
+}
+
 .sidebar-title {
   font-family: var(--font-serif);
   font-size: 1.15rem;
   font-weight: 600;
   margin-top: 1px;
+}
+
+.sidebar-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.sidebar-close-btn {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--text-secondary);
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  padding: 0.25rem 0.5rem;
+  min-height: 36px;
+  min-width: 36px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.sidebar-close-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
 }
 
 .btn-add-entry {
@@ -1299,6 +1334,20 @@ a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px
 .field-helper { font-size: 0.72rem; color: var(--text-muted); }
 .field-counter { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted); }
 
+/* Friendly Field Error Highlighting */
+.field-error-pulse {
+  border-bottom-color: var(--accent-warm) !important;
+  border-left-color: var(--accent-warm) !important;
+  box-shadow: 0 0 0 1px var(--accent-warm) !important;
+  animation: shakeField 0.3s ease-in-out;
+}
+
+@keyframes shakeField {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
 /* Editor Bottom Bar */
 .editor-bottom-bar {
   display: flex;
@@ -1330,6 +1379,9 @@ a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px
   min-height: 44px; min-width: 60px; padding: 0.2rem 0.5rem;
   font-family: var(--font-mono); color: var(--text-secondary); border: none; background: transparent;
 }
+.mobile-bar-btn:hover, .mobile-bar-btn:active {
+  color: var(--accent);
+}
 .bar-btn-symbol { font-size: 1.1rem; line-height: 1; }
 .bar-btn-label { font-size: 0.68rem; text-transform: uppercase; margin-top: 2px; }
 .mobile-bar-btn-primary { color: var(--accent); font-weight: 600; }
@@ -1355,8 +1407,9 @@ a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px
 }
 .modal-title { font-family: var(--font-serif); font-size: 1.3rem; font-weight: 600; }
 .modal-close-btn {
-  font-family: var(--font-mono); font-size: 1.1rem; color: var(--text-secondary);
-  padding: 0.25rem 0.5rem; border-radius: var(--radius-xs);
+  font-family: var(--font-mono); font-size: 1.25rem; color: var(--text-secondary);
+  padding: 0.25rem 0.5rem; border-radius: var(--radius-xs); min-width: 38px; min-height: 38px;
+  display: inline-flex; align-items: center; justify-content: center;
 }
 .modal-close-btn:hover { background-color: var(--bg-surface-subtle); color: var(--text-primary); }
 .modal-description { font-size: 0.86rem; color: var(--text-secondary); line-height: 1.45; }
@@ -1383,63 +1436,221 @@ a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px
 .btn-log-missing {
   font-family: var(--font-mono); font-size: 0.76rem; padding: 0.25rem 0.6rem;
   background-color: var(--bg-surface-subtle); border: 1px solid var(--border-strong);
-  border-radius: var(--radius-xs); color: var(--accent);
+  border-radius: var(--radius-xs); color: var(--accent); min-height: 32px;
 }
 .btn-log-missing:hover { background-color: var(--accent); color: var(--accent-contrast); }
 
-/* Toast & Undo */
+/* Toast & Notification Shelf */
 .toast-shelf {
   position: fixed; bottom: 2rem; right: 2rem; z-index: 120;
-  display: flex; flex-direction: column; gap: 0.5rem;
+  display: flex; flex-direction: column; gap: 0.5rem; max-width: 440px;
 }
 .toast-item {
   background-color: var(--text-primary); color: var(--bg-surface);
-  padding: 0.8rem 1.2rem; border-radius: var(--radius-sm);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.22); display: flex; align-items: center;
-  gap: 1rem; font-size: 0.88rem; min-height: 44px;
+  padding: 0.8rem 1.15rem; border-radius: var(--radius-sm);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.22); display: flex; align-items: center;
+  gap: 0.85rem; font-size: 0.88rem; min-height: 44px;
+  border-left: 4px solid var(--accent); transition: all 140ms ease;
 }
-.toast-actions { display: flex; align-items: center; gap: 0.5rem; }
+.toast-item.toast-success { border-left-color: var(--status-completed-text); }
+.toast-item.toast-warning { border-left-color: var(--accent-warm); }
+.toast-item.toast-error { border-left-color: #dc2626; }
+.toast-item.toast-info { border-left-color: var(--accent); }
+.toast-item.toast-undo { border-left-color: var(--accent); }
+
+.toast-message { flex: 1; line-height: 1.35; font-size: 0.86rem; }
+.toast-actions { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
 .btn-toast-undo {
   font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600;
   background-color: var(--bg-surface); color: var(--text-primary);
-  border: 1px solid currentColor; padding: 0.25rem 0.65rem; border-radius: var(--radius-xs);
+  border: 1px solid currentColor; padding: 0.3rem 0.65rem; border-radius: var(--radius-xs);
+  min-height: 32px;
 }
-.btn-toast-dismiss { color: var(--bg-surface); background: transparent; border: none; font-size: 1rem; padding: 0.2rem 0.4rem; }
+.btn-toast-undo:hover { background-color: var(--bg-active); }
+.btn-toast-dismiss {
+  color: var(--bg-surface); background: transparent; border: none; font-size: 1.2rem;
+  padding: 0.2rem 0.45rem; cursor: pointer; line-height: 1; min-height: 32px; min-width: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.btn-toast-dismiss:hover { opacity: 0.75; }
+
 .drawer-overlay {
   display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(20, 18, 16, 0.5); z-index: 15;
+  background-color: rgba(20, 18, 16, 0.55); z-index: 45;
 }
 
 /* --------------------------------------------------------------------------
-   12. Responsive Design (Desktop, Tablet 900px/768px, Mobile 360px)
+   12. Responsive Design (Desktop, Tablet 960px, Mobile 768px, 640px, 480px, 360px)
    -------------------------------------------------------------------------- */
 @media (max-width: 960px) {
-  :root { --sidebar-width: 330px; }
+  :root { --sidebar-width: 320px; }
   .main-workspace { padding: 1.25rem 1.25rem 4rem 1.25rem; }
   .notebook-sheet-content { padding: 1.75rem 1.5rem 2rem 1.25rem; }
   .notebook-page-margin { width: 32px; }
-  .editor-meta-strip { grid-template-columns: 1fr; gap: 0.85rem; }
+  /* Keep meta strip 3-col on tablet — only collapse on mobile */
+  .editor-meta-strip { gap: 0.9rem; }
 }
 
 @media (max-width: 768px) {
   .menu-toggle-btn { display: inline-flex; }
+  .sidebar-close-btn { display: inline-flex; }
+
+  /* Slide-over sidebar drawer */
   .ledger-sidebar {
-    position: fixed; top: var(--header-height); bottom: 56px; left: 0;
-    width: 86%; max-width: 360px; transform: translateX(-100%);
-    transition: transform 140ms ease-in-out; box-shadow: 2px 0 16px rgba(0,0,0,0.2); z-index: 30;
+    position: fixed; top: var(--header-height);
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    left: 0;
+    width: min(340px, 88vw);
+    min-width: 0 !important;
+    transform: translateX(-100%);
+    transition: transform 140ms ease-in-out;
+    box-shadow: 2px 0 20px rgba(0,0,0,0.3);
+    z-index: 50;
   }
   .ledger-sidebar.open { transform: translateX(0); }
   .drawer-overlay.active { display: block; }
-  .main-workspace { padding: 0.75rem 0.75rem 5rem 0.75rem; }
-  .entry-editor-form { border-left: none; border-right: none; border-radius: 0; }
-  .notebook-page-margin { width: 20px; }
-  .notebook-sheet-content { padding: 1.25rem 1rem 1.5rem 0.85rem; }
+
+  .main-workspace {
+    padding: 0.65rem 0.5rem calc(68px + env(safe-area-inset-bottom, 0px)) 0.5rem;
+  }
+  .entry-editor-form { border-left: none; border-right: none; border-radius: 0; box-shadow: none; }
+  .notebook-page-margin { width: 16px; }
+  .notebook-sheet-content { padding: 1.15rem 0.85rem 1.5rem 0.7rem; gap: 1.25rem; }
+
+  /* Meta strip collapses to 1 column on mobile */
+  .editor-meta-strip { grid-template-columns: 1fr; gap: 0.75rem; }
+
   .mobile-bottom-bar { display: flex; }
   .header-center, .brand-meta-line { display: none; }
+
+  /* Minimum tap target size for accessibility */
   button, select, input { min-height: 44px; }
+  /* Prevent iOS auto-zoom on input focus */
   .field-input, .field-select, .field-textarea, .search-input { font-size: 16px !important; }
-  .toast-shelf { bottom: 4.5rem; left: 1rem; right: 1rem; }
-  .toast-item { justify-content: space-between; }
+
+  /* Modals full-width on mobile */
+  .modal-dialog { width: 95%; max-width: 100%; padding: 1.25rem 1rem; max-height: 85vh; }
+  .modal-footer { flex-direction: column-reverse; gap: 0.5rem; }
+  .modal-footer button { width: 100%; min-height: 44px; justify-content: center; }
+  .modal-footer-stacked button { min-height: 46px; }
+
+  /* Banners stack vertically */
+  .banner { flex-direction: column; align-items: flex-start; gap: 0.5rem; padding: 0.75rem 0.9rem; }
+  .banner-actions { width: 100%; justify-content: flex-end; }
+
+  /* Toasts above mobile bottom bar */
+  .toast-shelf {
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    left: 0.75rem;
+    right: 0.75rem;
+    max-width: 100%;
+  }
+  .toast-item { width: 100%; justify-content: space-between; font-size: 0.84rem; padding: 0.75rem 0.95rem; }
+}
+
+@media (max-width: 640px) {
+  /* Header: hide text labels, show only symbols */
+  .btn-header .btn-label { display: none; }
+  .btn-header { padding: 0.4rem 0.55rem; min-height: 38px; min-width: 38px; justify-content: center; }
+  .btn-header .btn-symbol { font-size: 1.1rem; }
+  .header-left, .header-right { gap: 0.3rem; }
+  .app-header { padding: 0 0.65rem; }
+  .brand-title { font-size: 0.9rem; }
+  .brand-seal { display: none; }
+
+  /* Dropdown: fixed anchored below header to never overflow screen width */
+  .dropdown-menu {
+    position: fixed;
+    top: calc(var(--header-height) + 4px);
+    right: 8px;
+    left: auto;
+    width: min(280px, calc(100vw - 16px));
+    max-width: calc(100vw - 16px);
+    z-index: 100;
+  }
+
+  /* Editor header stacks vertically */
+  .editor-header-bar { flex-direction: column; align-items: stretch; gap: 0.65rem; }
+  .editor-actions-group { width: 100%; display: flex; gap: 0.5rem; }
+  .editor-actions-group button { flex: 1; min-height: 44px; justify-content: center; }
+  .btn-kbd { display: none; }
+
+  /* Day/week stamp badges wrap nicely */
+  .editor-day-indicator { flex-wrap: wrap; gap: 0.4rem; }
+
+  /* Quick hours pills */
+  .quick-hours-pills { gap: 0.35rem; }
+  .pill-hour { min-height: 36px; min-width: 48px; padding: 0.2rem 0.6rem; font-size: 0.82rem; }
+
+  /* Sidebar summary shelf: 2×2 grid on narrow screens */
+  .summary-shelf { grid-template-columns: repeat(2, 1fr); row-gap: 0.35rem; }
+}
+
+@media (max-width: 480px) {
+  /* Login page on very small phones */
+  .login-screen-wrapper { padding: 0.75rem 0.5rem; align-items: flex-start; }
+  .login-book-cover { max-width: 100%; border-radius: 0; border-left: none; border-right: none; }
+  .login-book-spine { width: 7px; }
+  .login-book-face { padding: 1.35rem 0.9rem 1.1rem 0.9rem; gap: 1rem; }
+  .login-title { font-size: 1.35rem; }
+  .profiles-cards-row { grid-template-columns: 1fr; gap: 0.45rem; }
+
+  /* Sidebar controls */
+  .filter-controls-row { flex-direction: column; gap: 0.5rem; }
+  .search-kbd-hint { display: none; }
+
+  /* Calendar legend wraps on tiny screens */
+  .cal-legend { flex-wrap: wrap; gap: 0.4rem 0.65rem; }
+
+  /* Editor bottom bar stacks */
+  .editor-bottom-bar { flex-direction: column; align-items: stretch; gap: 0.65rem; }
+  .editor-bottom-right button { width: 100%; min-height: 44px; justify-content: center; }
+
+  /* Reduce margin for more writing space */
+  .notebook-page-margin { width: 10px; }
+
+  /* Toasts: smaller text */
+  .toast-item { font-size: 0.82rem; }
+
+  /* Modal close button always large enough to tap */
+  .modal-close-btn { min-width: 44px; min-height: 44px; font-size: 1.3rem; }
+}
+
+@media (max-width: 360px) {
+  /* Ultra-compact phone screens (320px - 360px) */
+  .app-header { padding: 0 0.35rem; }
+  .header-left, .header-right { gap: 0.2rem; }
+  .btn-header { min-width: 34px; min-height: 34px; padding: 0.25rem 0.35rem; }
+  .brand-title { font-size: 0.84rem; }
+
+  .login-book-face { padding: 1rem 0.65rem; gap: 0.85rem; }
+  .login-title { font-size: 1.2rem; }
+  .login-subtitle { font-size: 0.75rem; }
+
+  .sidebar-top-bar { padding: 0.65rem 0.65rem; }
+  .summary-shelf { padding: 0.35rem 0.15rem; }
+  .metric-value { font-size: 0.88rem; }
+  .metric-label { font-size: 0.58rem; }
+
+  .ledger-row { padding: 0.55rem 0.55rem; }
+  .ledger-margin { width: 54px; margin-right: 0.45rem; }
+  .ledger-day { font-size: 0.74rem; }
+  .ledger-date { font-size: 0.65rem; }
+  .ledger-title { font-size: 0.9rem; }
+
+  .mini-calendar-section { padding: 0.65rem 0.45rem; }
+  .cal-month-label { min-width: 95px; font-size: 0.88rem; }
+  .cal-day-btn { font-size: 0.74rem; min-height: 30px; }
+
+  .notebook-page-margin { width: 8px; }
+  .notebook-sheet-content { padding: 0.85rem 0.5rem 1.25rem 0.45rem; gap: 0.9rem; }
+  .day-stamp-badge .stamp-number { font-size: 1rem; }
+  .week-stamp-badge { font-size: 0.7rem; }
+  .field-input-title { font-size: 1.1rem; }
+
+  .mobile-bar-btn { min-width: 48px; padding: 0.15rem 0.2rem; }
+  .bar-btn-symbol { font-size: 0.95rem; }
+  .bar-btn-label { font-size: 0.6rem; }
 }
 
 /* --------------------------------------------------------------------------
